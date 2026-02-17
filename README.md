@@ -1,5 +1,8 @@
 # Virtual Vehicle Simulation Framework
 
+[![View Walkthrough](https://img.shields.io/badge/Documentation-Walkthrough-blue?style=for-the-badge)](WALKTHROUGH.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+
 ## Overview
 The **Virtual Vehicle Simulation** is a comprehensive Python-based testbed for automotive software. It mocks a modern vehicle's electronic architecture, including Electronic Control Units (ECUs), physical plant models (Dynamics, Battery, Sensors), and a virtual communication bus (CAN/Ethernet). 
 
