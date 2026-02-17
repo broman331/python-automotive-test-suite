@@ -69,22 +69,59 @@ class VehicleDynamics(BasePlant):
         self.state['yaw'] += self.state['yaw_rate'] * dt
         self.state['v'] = max(0, v + accel * dt)
 
-        # Lateral Dynamics
-        ideal_yaw_rate = (self.state['v'] / self.wheelbase) * math.tan(self.steering_angle)
-        max_yaw_rate = 9.8 / (self.state['v'] + 0.1)
+        # Lateral Dynamics (Enhanced Bicycle Model)
+        # Calculate tire slip angles
+        if v > 1.0:
+            # Alpha F = Steering - (Vy + lf*omega) / Vx
+            alpha_f = self.steering_angle - (self.state['yaw_rate'] * 1.25) / v # assuming Vy~0
+            
+            # Alpha R = - (Vy - lr*omega) / Vx
+            # If Vy~0, Alpha R = - (-lr*omega) / Vx = + lr*omega / Vx
+            alpha_r = (self.state['yaw_rate'] * 1.25) / v
+        else:
+            alpha_f = 0
+            alpha_r = 0
 
-        if abs(ideal_yaw_rate) > max_yaw_rate:
-            ideal_yaw_rate = math.copysign(max_yaw_rate, ideal_yaw_rate) * 1.5
+        # Cornering Stiffness (Linear region)
+        C_alpha_f = 60000.0 # N/rad
+        C_alpha_r = 60000.0 # N/rad
 
-        avg_mu = (self.mu_left + self.mu_right) / 2.0
-        tau = 0.2 / max(avg_mu, 0.1)
+        # Lateral Forces with Saturation (Brush Model Approximation)
+        # Max Force = Normal Load * mu
+        # Assume 50/50 weight dist for simplicity
+        F_z_f = self.mass * 9.81 * 0.5 
+        F_z_r = self.mass * 9.81 * 0.5
+        
+        Fy_max_f = F_z_f * self.mu_left
+        Fy_max_r = F_z_r * self.mu_right
+        
+        # Raw Linear Force
+        Fy_f_raw = C_alpha_f * alpha_f
+        Fy_r_raw = C_alpha_r * alpha_r
+        
+        # Saturation
+        Fy_f = max(-Fy_max_f, min(Fy_max_f, Fy_f_raw))
+        Fy_r = max(-Fy_max_r, min(Fy_max_r, Fy_r_raw))
 
-        yaw_accel_steering = (ideal_yaw_rate - self.state['yaw_rate']) / tau
-        # Moment = Force_Diff * (Track / 2)
+        # Understeer Gradient (K_us)
+        # Yaw Moment sum
+        moment_friction = Fy_f * (self.wheelbase/2) - Fy_r * (self.wheelbase/2)
+        
+        # Add disturbance from split-mu braking
         yaw_accel_disturbance = (f_diff_brake * (self.track_width / 2.0)) / self.inertia_z
+        
+        # Total Yaw Accel
+        yaw_accel = moment_friction / self.inertia_z + yaw_accel_disturbance
+        self.state['yaw_rate'] += yaw_accel * dt
+        
+        # Damping (natural tire scrub and air resistance to rotation)
+        self.state['yaw_rate'] *= 0.98 
 
-        self.state['yaw_rate'] += (yaw_accel_steering + yaw_accel_disturbance) * dt
-        self.state['slip_angle'] = (self.state['v'] * self.state['yaw_rate']) * 0.05
+        self.state['slip_angle'] = alpha_r # Approx slip angle at CG
+
+        # Calculate Lateral Acceleration (Sensor)
+        # Ay = (Fy_f + Fy_r) / m
+        self.state['lat_accel'] = (Fy_f + Fy_r) / self.mass
 
         # Efficiency logic
         power_out = (self.throttle * 3000.0) * self.state['v']
@@ -95,7 +132,7 @@ class VehicleDynamics(BasePlant):
         """Broadcast telemetry and derived sensor data."""
         self.bus.broadcast('WHEEL_SPEED', self.state['v'], sender=self.name)
         self.bus.broadcast('YAW_RATE', self.state['yaw_rate'], sender=self.name)
-        self.bus.broadcast('LATERAL_ACCEL', self.state['v'] * self.state['yaw_rate'], sender=self.name)
+        self.bus.broadcast('LATERAL_ACCEL', self.state.get('lat_accel', 0.0), sender=self.name)
         self.bus.broadcast('GPS_POS', {'x': self.state['x'], 'y': self.state['y']}, sender=self.name)
 
         # Acceleration for Airbag ECU
