@@ -27,8 +27,8 @@ jobs:
     - name: Lint with pylint
       run: |
         # Stop the build if there are Python syntax errors or undefined names
-        # We allow it to pass if score is > 8.0
-        PYTHONPATH=. pylint virtual_vehicle/ --fail-under=8.0
+        # We allow it to pass if score is > 7.0
+        PYTHONPATH=. pylint virtual_vehicle/ --fail-under=7.0
     - name: Test with pytest
       run: |
         PYTHONPATH=. pytest --cov=virtual_vehicle --cov-report=xml

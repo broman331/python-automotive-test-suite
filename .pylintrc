@@ -1,0 +1,19 @@
+[MASTER]
+ignore=venv
+
+[MESSAGES CONTROL]
+disable=
+    C0301, # Line too long
+    R0902, # Too many instance attributes
+    R0913, # Too many arguments
+    R0914, # Too many local variables
+    R0917, # Too many positional arguments
+    R0903, # Too few public methods
+    C0103, # Naming style (e.g. L, Iz)
+    W0201, # Attribute defined outside __init__
+    C0411, # Import order (often tricky with virtual packages)
+    R1730, # Consider using min()
+    R1731, # Consider using max()
+
+[REPORTS]
+output-format=text

@@ -40,13 +40,13 @@ class SimulationEngine:
         self.running = True
         steps = int(duration / self.dt)
         print(f"Starting simulation for {duration}s ({steps} steps)...")
-        
+
         for i in range(steps):
             if not self.running:
                 break
             self.step()
             # Optional: Real-time pacing could be added here
-            # time.sleep(self.dt) 
+            # time.sleep(self.dt)
 
         print("Simulation complete.")
 

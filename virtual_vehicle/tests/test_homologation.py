@@ -22,17 +22,17 @@ class TestHomologation:
         Expected: Gateway responds with correct VIN.
         """
         sim, gateway = obd_setup
-        
+
         # Send Request
         sim.bus.broadcast('OBD_REQUEST', {'mode': 0x09, 'pid': 0x02}, sender='ScanTool')
         sim.step()
-        
+
         # Check Response
         logs = sim.bus.get_log()
         response = next((l['data'] for l in logs if l['id'] == 'OBD_RESPONSE'), None)
-        
+
         self.generate_report(sim, "Homo_ReadVIN")
-        
+
         assert response is not None, "Gateway did not respond to OBD request"
         assert response['data'] == "1FA-VIRTUAL-CAR-001", f"Incorrect VIN: {response['data']}"
 
@@ -42,15 +42,15 @@ class TestHomologation:
         Expected: Gateway returns list of DTCs.
         """
         sim, gateway = obd_setup
-        
+
         sim.bus.broadcast('OBD_REQUEST', {'mode': 0x03}, sender='ScanTool')
         sim.step()
-        
+
         logs = sim.bus.get_log()
         response = next((l['data'] for l in logs if l['id'] == 'OBD_RESPONSE'), None)
-        
+
         self.generate_report(sim, "Homo_ReadDTC")
-        
+
         assert response is not None
         assert 'P0123' in response['data'], "Expected mock DTC P0123"
 
@@ -60,14 +60,14 @@ class TestHomologation:
         Expected: Returns 0x00 (All Ready).
         """
         sim, gateway = obd_setup
-        
+
         sim.bus.broadcast('OBD_REQUEST', {'mode': 0x01, 'pid': 0x01}, sender='ScanTool')
         sim.step()
-        
+
         logs = sim.bus.get_log()
         response = next((l['data'] for l in logs if l['id'] == 'OBD_RESPONSE'), None)
-        
+
         self.generate_report(sim, "Homo_Readiness")
-        
+
         assert response is not None
         assert response['data'] == 0x00, "Expected Readiness Status 0x00"

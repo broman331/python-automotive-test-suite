@@ -15,7 +15,7 @@ class CameraPlant(BasePlant):
 
     def update_physics(self, dt):
         # We need to know vehicle lateral motion to update offset
-        # But for now, we'll let the vehicle dynamics "drive" this state 
+        # But for now, we'll let the vehicle dynamics "drive" this state
         # via a message or shared state if possible.
         # Ideally, Camera should just read vehicle state and transform to lane coordinates.
         pass
@@ -37,10 +37,10 @@ class CameraPlant(BasePlant):
         # Publish Lane Info
         # confidence: 0.0 - 1.0 (simulating visibility)
         confidence = max(0.0, 1.0 - self.noise_level)
-        
+
         # Add noise to measurements if visibility is poor
         noisy_offset = self.offset_from_center + (random.uniform(-0.5, 0.5) * self.noise_level)
-        
+
         data = {
             'lane_offset': noisy_offset, # +ve = left of center
             'heading_idx': self.heading_error,

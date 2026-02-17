@@ -29,7 +29,7 @@ class AirbagECU(BaseECU):
         self.airbags_deployed = True
         self.pretensioners_deployed = True
         self.deployment_time = time.time()
-        
+
         # Broadcast Critical Safety Messages
         self.bus.broadcast('DEPLOY_AIRBAG', True, sender=self.name)
         self.bus.broadcast('DEPLOY_SEATBELT', True, sender=self.name)

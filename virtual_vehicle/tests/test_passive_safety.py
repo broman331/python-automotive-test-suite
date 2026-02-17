@@ -11,10 +11,10 @@ class TestPassiveSafety:
         sim = SimulationEngine(time_step=0.01) # High resolution for crash
         vehicle = VehicleDynamics('VehicleDynamics', sim.bus)
         acu = AirbagECU('AirbagECU', sim.bus)
-        
+
         sim.add_plant(vehicle)
         sim.add_ecu(acu)
-        
+
         return sim, vehicle, acu
 
     def generate_report(self, sim, test_name, result="PASS"):
@@ -27,29 +27,29 @@ class TestPassiveSafety:
         Expected: ACU deploys airbags and pretensioners.
         """
         sim, vehicle, acu = safety_setup
-        
+
         # Initial State: Moving fast
         vehicle.state['v'] = 30.0 # ~108 kph
-        
+
         print("\n--- CRASH TEST START ---")
-        
+
         # Simulate Crash Pulse (Rapid Deceleration)
         # We can't achieve 5g with normal brakes. We must force it or inject it.
         # Let's inject a fake ACCEL_X message from a "CrashSensor" (simulated by test harness)
         # OR force the vehicle state change.
-        
+
         # Option A: Inject Message
         sim.bus.broadcast('ACCEL_X', -60.0, sender='CrashSensor') # -6g (approx)
-        
+
         # Step ECUs
         sim.step()
         sim.step()
-        
+
         logs = sim.bus.get_log()
         deployment = next((l for l in logs if l['id'] == 'DEPLOY_AIRBAG'), None)
-        
+
         self.generate_report(sim, "Safe_Airbag_Deploy")
-        
+
         assert deployment is not None, "Airbag did not deploy on -6g impact"
         assert deployment['data'] is True
         assert acu.airbags_deployed is True
@@ -60,19 +60,19 @@ class TestPassiveSafety:
         Expected: No Airbag Deployment.
         """
         sim, vehicle, acu = safety_setup
-        
+
         vehicle.state['v'] = 30.0
-        
+
         # Apply Max Brakes
         sim.bus.broadcast('BRAKE_CMD', 1.0, sender='TestHarness')
-        
+
         for i in range(20):
             sim.step()
-            
+
         logs = sim.bus.get_log()
         deployment = next((l for l in logs if l['id'] == 'DEPLOY_AIRBAG'), None)
-        
+
         self.generate_report(sim, "Safe_No_Airbag_Braking")
-        
+
         assert deployment is None, "Airbag deployed during normal braking!"
         assert acu.airbags_deployed is False

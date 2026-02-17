@@ -11,7 +11,7 @@ class ReportGenerator:
     def generate(self, test_name, bus_log, result="PASS"):
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         filename = os.path.join(self.output_dir, f"{test_name}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.html")
-        
+
         html = f"""
         <html>
         <head>
@@ -31,7 +31,7 @@ class ReportGenerator:
             <h1>Test Report: {test_name}</h1>
             <p><strong>Time:</strong> {timestamp}</p>
             <p><strong>Result:</strong> <span class="{result.lower()}">{result}</span></p>
-            
+
             <h2>Message Log</h2>
             <table>
                 <tr>
@@ -41,12 +41,12 @@ class ReportGenerator:
                     <th>Data</th>
                 </tr>
         """
-        
+
         for i, msg in enumerate(bus_log):
             row_class = ""
             if "ALERT" in str(msg['id']) or "WARNING" in str(msg['id']):
                 row_class = "alert"
-            
+
             data_str = str(msg['data'])
             if len(data_str) > 100:
                 data_str = data_str[:100] + "..."
@@ -59,14 +59,14 @@ class ReportGenerator:
                     <td>{data_str}</td>
                 </tr>
             """
-            
+
         html += """
             </table>
         </body>
         </html>
         """
-        
+
         with open(filename, "w") as f:
             f.write(html)
-        
+
         print(f"Report generated: {filename}")

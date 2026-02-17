@@ -12,7 +12,7 @@ class V2XRadio(BasePlant):
         self.bsm_interval = 0.1 # 10Hz
         self.time_since_last_bsm = 0.0
         self.vehicle_state = {
-            'lat': 37.7749, 
+            'lat': 37.7749,
             'lon': -122.4194,
             'speed': 0.0,
             'heading': 0.0

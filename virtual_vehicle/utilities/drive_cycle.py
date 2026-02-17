@@ -15,12 +15,12 @@ class DriveCycle:
             (55, 0),  # Decel to Stop
             (60, 0)   # Stop
         ]
-    
+
     def get_target_speed(self, t):
         # Linear interpolation
         if t < 0: return 0.0
         if t >= self.points[-1][0]: return 0.0
-        
+
         for i in range(len(self.points) - 1):
             t1, v1 = self.points[i]
             t2, v2 = self.points[i+1]
@@ -40,17 +40,17 @@ class DriverModel:
     def step(self, target_speed, current_speed, dt):
         error = target_speed - current_speed
         self.integral_error += error * dt
-        
+
         # PI Control
         cmd = self.kp * error + self.ki * self.integral_error
-        
+
         throttle = 0.0
         brake = 0.0
-        
+
         if cmd > 0:
             throttle = min(1.0, cmd)
         else:
             brake = min(1.0, -cmd)
-            
+
         self.bus.broadcast('ACCEL_CMD', throttle, sender='Driver')
         self.bus.broadcast('BRAKE_CMD', brake, sender='Driver')
