@@ -1,0 +1,26 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+env/
+.env
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+*.cover
+
+# Project Specific
+reports/
+lint_report.txt
+lint_report_sim.txt
+coverage_report.txt
+
+# OS
+.DS_Store
