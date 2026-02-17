@@ -1,5 +1,6 @@
 # Virtual Vehicle Simulation Framework
 
+[![Python CI](https://github.com/broman331/python-automotive-test-suite/actions/workflows/main.yml/badge.svg)](https://github.com/broman331/python-automotive-test-suite/actions/workflows/main.yml)
 [![View Walkthrough](https://img.shields.io/badge/Documentation-Walkthrough-blue?style=for-the-badge)](WALKTHROUGH.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 
