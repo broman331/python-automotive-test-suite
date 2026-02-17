@@ -145,4 +145,42 @@ The Virtual Vehicle Simulation is now a fully operational, multi-domain testbed.
 6.  **Homologation** (OBD-II/WLTP)
 7.  **Connectivity** (V2X/OTA)
 
+### Phase 5: Expansion & New Domains Results
+
+**Objective**: Verify implementation of industry-standard protocols and advanced vehicle physics.
+
+#### 1. Diagnostics (UDS ISO 14229)
+*   **Suite**: `virtual_vehicle/tests/test_diagnostics.py`
+*   **Services Verified**:
+    *   **0x10 (Session Control)**: Transitions between Default/Programming sessions.
+    *   **0x27 (Security Access)**: Seed/Key exchange unlock mechanism.
+    *   **0x22 (Read Data)**: Retrieval of VIN and Battery Voltage via DID.
+    *   **0x31 (Routine Control)**: Remote activation of wiper test.
+
+#### 2. Electrification (Charging CCS/NACS)
+*   **Suite**: `virtual_vehicle/tests/test_charging.py`
+*   **Components**: Low-Level `ChargingStation` Plant Model + `BmsECU` Charging State Machine.
+*   **Scenario Verified**:
+    *   **Handshake**: Cable plug-in triggers transition to `HANDSHAKE` state.
+    *   **Profile**: Charger delivers voltage/current requested by BMS based on SoC.
+    *   **Termination**: Charging stops automatically when Target SoC (90%) is reached.
+
+#### 3. Enhanced Vehicle Dynamics
+*   **Suite**: `virtual_vehicle/tests/test_dynamics_advanced.py`
+*   **Physics Upgrade**: Replaced simple kinematic model with **Force-Based Tire Model** (Pacejka-style linear approximation with friction saturation).
+*   **Verified Behaviors**:
+    *   **Understeer Limit**: Cornering at high speed on low friction ($\mu=0.4$) results in front tire saturation. Lateral acceleration is correctly clamped at ~0.4g (3.9 m/s²).
+    *   **Stability**: Vehicle naturally damps out yaw oscillations from split-mu braking events.
+
+## Conclusion
+
+The Virtual Vehicle Simulation is now a fully operational, multi-domain testbed. It supports:
+1.  **Vehicle Dynamics** (Longitudinal/Lateral/Split-Mu/Stability)
+2.  **Functional Safety** (ISO 26262 Fault Injection)
+3.  **Cybersecurity** (ISO 21434 SecOC/Fuzzing)
+4.  **ADAS** (ACC/AEB/LKA with SOTIF)
+5.  **Electrification** (BMS/Thermal/Regen/Charging)
+6.  **Homologation** (OBD-II/WLTP/UDS)
+7.  **Connectivity** (V2X/OTA)
+
 This framework is ready for integration into a CI/CD pipeline to serve as a **Shift-Left** validation tool for automotive software development.
