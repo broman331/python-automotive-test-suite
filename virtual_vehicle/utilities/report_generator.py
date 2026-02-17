@@ -8,9 +8,18 @@ class ReportGenerator:
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-    def generate(self, test_name, bus_log, result="PASS"):
+    def generate(self, test_name, bus_log, result="PASS", failure_details=None):
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         filename = os.path.join(self.output_dir, f"{test_name}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.html")
+
+        failure_html = ""
+        if failure_details:
+             failure_html = f"""
+             <div class="alert">
+                <h3>Failure Details</h3>
+                <pre>{failure_details}</pre>
+             </div>
+             """
 
         html = f"""
         <html>
@@ -24,13 +33,15 @@ class ReportGenerator:
                 th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
                 th {{ background-color: #f2f2f2; }}
                 tr:nth-child(even) {{ background-color: #f9f9f9; }}
-                .alert {{ background-color: #ffdddd; color: #a94442; }}
+                .alert {{ background-color: #ffdddd; color: #a94442; padding: 10px; border: 1px solid #ebccd1; border-radius: 4px; }}
+                pre {{ white-space: pre-wrap; }}
             </style>
         </head>
         <body>
             <h1>Test Report: {test_name}</h1>
             <p><strong>Time:</strong> {timestamp}</p>
             <p><strong>Result:</strong> <span class="{result.lower()}">{result}</span></p>
+            {failure_html}
 
             <h2>Message Log</h2>
             <table>
