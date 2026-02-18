@@ -67,7 +67,12 @@ class VehicleDynamics(BasePlant):
         self.state['x'] += v * math.cos(yaw) * dt
         self.state['y'] += v * math.sin(yaw) * dt
         self.state['yaw'] += self.state['yaw_rate'] * dt
-        self.state['v'] = v + accel * dt
+        new_v = v + accel * dt
+        # Clamp at zero if we cross it (braking/acceleration limit)
+        if (v > 0 and new_v < 0) or (v < 0 and new_v > 0):
+            new_v = 0
+            
+        self.state['v'] = new_v
 
         # Lateral Dynamics (Enhanced Bicycle Model)
         # Calculate tire slip angles
