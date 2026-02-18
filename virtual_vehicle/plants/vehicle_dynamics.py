@@ -67,7 +67,7 @@ class VehicleDynamics(BasePlant):
         self.state['x'] += v * math.cos(yaw) * dt
         self.state['y'] += v * math.sin(yaw) * dt
         self.state['yaw'] += self.state['yaw_rate'] * dt
-        self.state['v'] = max(0, v + accel * dt)
+        self.state['v'] = v + accel * dt
 
         # Lateral Dynamics (Enhanced Bicycle Model)
         # Calculate tire slip angles
