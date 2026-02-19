@@ -76,3 +76,13 @@ Tests for distance tracking, persistence, and dash functions.
 | `test_odometer.py` | Persistence (NVM) | Verifies that odometer values are saved to "flash" and correctly loaded upon ECU reboot. |
 | `test_odometer.py` | Trip Reset | Verifies that resetting the trip meter works as expected without affecting the life-to-date odometer. |
 | `test_odometer.py` | High Range Stability | Verifies that the system handles extremely high values (999,999 km) without overflow or data corruption. |
+
+## 9. AI Adversary Tests
+Fuzzing, RL-based traffic, and Neural Sensor simulation.
+
+| Test File | Scenario | Description |
+| :--- | :--- | :--- |
+| `test_genai_fuzzing.py` | Adversarial Braking | Uses `ScenarioGenerator` to fuzz speed and friction, creating edge-case braking scenarios. |
+| `test_rl_traffic.py` | Cut-In Learning | Trains an RL `TrafficAgent` to execute dangerous cut-in maneuvers against the Ego vehicle. |
+| `test_neural_perception.py` | Rain Robustness | Verifies AEB triggers despite heavy rain noise (0.5m std dev) in `NeuralRadar`. |
+| `test_neural_perception.py` | Fog & Ghost Objects | Verifies system behavior when presented with false positive detections (ghosts) in Fog conditions. |

@@ -87,7 +87,7 @@ class TestOdometer:
         sim.bus.broadcast('RESET_TRIP', None, sender='TestHarness')
         # We don't call sim.step() yet because that would immediately add distance
         # We check state immediately
-        assert body.trip_meter == 0.0, "Trip meter should be reset to zero"
+        assert body.trip_meter == pytest.approx(0.0), "Trip meter should be reset to zero"
         
         # 3. Drive one more step and verify it's ONLY that step
         sim.step()
@@ -143,6 +143,7 @@ class TestOdometer:
             
         sim = SimulationEngine(time_step=0.05)
         body = BodyECU('HighOdoECU', sim.bus, storage_path=nvm_file)
+        sim.add_ecu(body)
         
         # Drive 1000m
         sim.bus.broadcast('WHEEL_SPEED', 10.0, sender='Test')
@@ -153,3 +154,33 @@ class TestOdometer:
         print(f"Odometer after overflow test: {body.total_mileage/1000.0:.3f} km")
         
         self.generate_report(sim, "Odo_High_Mileage_Stability")
+
+    def test_stationary_no_accumulation(self, odo_setup):
+        """
+        Scenario: Vehicle is stationary (0 speed).
+        Expected: Odometer should NOT change.
+        """
+        sim, vehicle, body, _ = odo_setup
+        
+        vehicle.state['v'] = 0.0
+        initial_mileage = body.total_mileage
+        
+        for _ in range(50):
+            sim.step()
+            
+        assert body.total_mileage == initial_mileage, "Odometer should not increase when stationary"
+
+    def test_corrupted_nvm_recovery(self, tmp_path):
+        """
+        Scenario: NVM file contains garbage data.
+        Expected: ECU should detect corruption and start fresh (0.0) or handle gracefully.
+        """
+        nvm_file = str(tmp_path / "corrupt_odo.json")
+        with open(nvm_file, 'w') as f:
+            f.write("{INVALID_JSON_CONTENT")
+            
+        sim = SimulationEngine(time_step=0.05)
+        # Assuming BodyECU has a try/except block for loading and defaults to 0
+        body = BodyECU('BodyECU', sim.bus, storage_path=nvm_file)
+        
+        assert body.total_mileage == 0.0, "Should default to 0.0 on corrupted NVM"
